@@ -18,14 +18,6 @@ import {
   Clock
 } from 'lucide-react';
 
-// Firebase SDK functions (keeping original imports for compatibility)
-import {
-    collection, addDoc, doc, deleteDoc, onSnapshot, query,
-} from 'firebase/firestore';
-import {
-    signInAnonymously, onAuthStateChanged, signInWithCustomToken,
-} from 'firebase/auth';
-
 // Type Definitions
 interface Message {
   type: 'success' | 'error' | '';
@@ -223,7 +215,7 @@ function CareConnectDashboard(): JSX.Element {
 
     if (!isAuthReady) {
         return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
+            <div className="fixed inset-0 flex justify-center items-center bg-gray-50">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
                     <p className="text-lg text-gray-600">Initializing CareConnect...</p>
@@ -233,7 +225,7 @@ function CareConnectDashboard(): JSX.Element {
     }
 
     return (
-        <div className="flex h-screen bg-gray-50">
+        <div className="fixed inset-0 flex bg-gray-50 overflow-hidden">
             {/* Sidebar */}
             <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
                 <div className="flex items-center justify-center h-16 bg-white border-b border-gray-200">
@@ -269,9 +261,9 @@ function CareConnectDashboard(): JSX.Element {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}
-                <header className="bg-white shadow-sm border-b border-gray-200">
+                <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
                     <div className="flex items-center justify-between px-6 py-4">
                         <div className="flex items-center">
                             <button
@@ -302,168 +294,170 @@ function CareConnectDashboard(): JSX.Element {
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto p-6">
-                    {message.text && (
-                        <div className={`mb-6 p-4 rounded-lg ${
-                            message.type === 'success' 
-                                ? 'bg-green-50 border border-green-200 text-green-800' 
-                                : 'bg-red-50 border border-red-200 text-red-800'
-                        }`}>
-                            {message.text}
-                        </div>
-                    )}
-
-                    <div className="max-w-7xl mx-auto">
-                        {/* Page Header */}
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold text-gray-900">Appointment Management</h2>
-                            <p className="mt-2 text-gray-600">Schedule and manage your healthcare appointments</p>
-                        </div>
-
-                        {/* Upcoming Appointments */}
-                        <div className="mb-8 bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div className="px-6 py-4 border-b border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-900">Upcoming Appointments</h3>
+                <main className="flex-1 overflow-y-auto">
+                    <div className="p-6 h-full">
+                        {message.text && (
+                            <div className={`mb-6 p-4 rounded-lg ${
+                                message.type === 'success' 
+                                    ? 'bg-green-50 border border-green-200 text-green-800' 
+                                    : 'bg-red-50 border border-red-200 text-red-800'
+                            }`}>
+                                {message.text}
                             </div>
-                            <div className="p-6">
-                                {pendingAppointments.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {pendingAppointments.map((appt, index) => (
-                                            <div key={appt.id || index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold text-gray-900">{appt.doctorName}</h4>
-                                                    <p className="text-sm text-gray-600 mt-1">
-                                                        {new Date(appt.preferredDate).toLocaleDateString('en-US', { 
-                                                            month: 'long', 
-                                                            day: 'numeric', 
-                                                            year: 'numeric', 
-                                                            timeZone: 'UTC' 
-                                                        })} at {appt.timeSlot}
-                                                    </p>
+                        )}
+
+                        <div className="max-w-7xl mx-auto">
+                            {/* Page Header */}
+                            <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-gray-900">Appointment Management</h2>
+                                <p className="mt-2 text-gray-600">Schedule and manage your healthcare appointments</p>
+                            </div>
+
+                            {/* Upcoming Appointments */}
+                            <div className="mb-8 bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div className="px-6 py-4 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-900">Upcoming Appointments</h3>
+                                </div>
+                                <div className="p-6">
+                                    {pendingAppointments.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {pendingAppointments.map((appt, index) => (
+                                                <div key={appt.id || index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                                    <div className="flex-1">
+                                                        <h4 className="font-semibold text-gray-900">{appt.doctorName}</h4>
+                                                        <p className="text-sm text-gray-600 mt-1">
+                                                            {new Date(appt.preferredDate).toLocaleDateString('en-US', { 
+                                                                month: 'long', 
+                                                                day: 'numeric', 
+                                                                year: 'numeric', 
+                                                                timeZone: 'UTC' 
+                                                            })} at {appt.timeSlot}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center space-x-3">
+                                                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                                            Reschedule
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleCancelAppointment(appt.id)}
+                                                            disabled={isLoading}
+                                                            className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50 disabled:opacity-50"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center space-x-3">
-                                                    <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                                                        Reschedule
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleCancelAppointment(appt.id)}
-                                                        disabled={isLoading}
-                                                        className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50 disabled:opacity-50"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500 text-center py-8">No upcoming appointments.</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Schedule New Appointment */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                            <div className="px-6 py-4 border-b border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-900">Schedule New Appointment</h3>
-                            </div>
-                            <div className="p-6">
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        <div>
-                                            <label htmlFor="appointmentType" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Appointment Type
-                                            </label>
-                                            <select 
-                                                id="appointmentType" 
-                                                value={appointmentType} 
-                                                onChange={(e) => setAppointmentType(e.target.value)} 
-                                                required 
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
-                                            >
-                                                {mockAppointmentTypes.map(type => (
-                                                    <option key={type.value} value={type.value}>{type.label}</option>
-                                                ))}
-                                            </select>
+                                            ))}
                                         </div>
+                                    ) : (
+                                        <p className="text-gray-500 text-center py-8">No upcoming appointments.</p>
+                                    )}
+                                </div>
+                            </div>
 
-                                        <div>
-                                            <label htmlFor="healthcareProvider" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Healthcare Provider
-                                            </label>
-                                            <select 
-                                                id="healthcareProvider" 
-                                                value={healthcareProvider} 
-                                                onChange={(e) => setHealthcareProvider(e.target.value)} 
-                                                required 
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
-                                            >
-                                                {mockDoctors.map(doc => (
-                                                    <option key={doc.id} value={doc.id}>{doc.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="preferredDate" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Date
-                                            </label>
-                                            <div className="relative">
-                                                <input 
-                                                    type="date" 
-                                                    id="preferredDate" 
-                                                    value={preferredDate} 
-                                                    onChange={(e) => setPreferredDate(e.target.value)} 
-                                                    min={new Date().toISOString().split('T')[0]} 
+                            {/* Schedule New Appointment */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div className="px-6 py-4 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-900">Schedule New Appointment</h3>
+                                </div>
+                                <div className="p-6">
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            <div>
+                                                <label htmlFor="appointmentType" className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Appointment Type
+                                                </label>
+                                                <select 
+                                                    id="appointmentType" 
+                                                    value={appointmentType} 
+                                                    onChange={(e) => setAppointmentType(e.target.value)} 
                                                     required 
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
-                                                    placeholder="mm/dd/yyyy"
-                                                />
-                                                <Calendar className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="selectedTimeSlot" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Time
-                                            </label>
-                                            <div className="relative">
-                                                <select 
-                                                    id="selectedTimeSlot" 
-                                                    value={selectedTimeSlot} 
-                                                    onChange={(e) => setSelectedTimeSlot(e.target.value)} 
-                                                    required 
-                                                    disabled={!healthcareProvider || availableTimeSlots.length === 0}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                                 >
-                                                    <option value="" disabled>--:-- --</option>
-                                                    {availableTimeSlots.map(slot => (
-                                                        <option key={slot} value={slot}>{slot}</option>
+                                                    {mockAppointmentTypes.map(type => (
+                                                        <option key={type.value} value={type.value}>{type.label}</option>
                                                     ))}
                                                 </select>
-                                                <Clock className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
                                             </div>
-                                            {healthcareProvider && availableTimeSlots.length === 0 && (
-                                                <p className="mt-1 text-xs text-red-500">No time slots available for this provider.</p>
-                                            )}
-                                        </div>
-                                    </div>
 
-                                    <div className="pt-4">
-                                        <button
-                                            onClick={(e) => handleSubmit(e as any)}
-                                            disabled={isLoading}
-                                            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            {isLoading ? (
-                                                <>
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                    Scheduling...
-                                                </>
-                                            ) : (
-                                                'Schedule Appointment'
-                                            )}
-                                        </button>
+                                            <div>
+                                                <label htmlFor="healthcareProvider" className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Healthcare Provider
+                                                </label>
+                                                <select 
+                                                    id="healthcareProvider" 
+                                                    value={healthcareProvider} 
+                                                    onChange={(e) => setHealthcareProvider(e.target.value)} 
+                                                    required 
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                                                >
+                                                    {mockDoctors.map(doc => (
+                                                        <option key={doc.id} value={doc.id}>{doc.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="preferredDate" className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Date
+                                                </label>
+                                                <div className="relative">
+                                                    <input 
+                                                        type="date" 
+                                                        id="preferredDate" 
+                                                        value={preferredDate} 
+                                                        onChange={(e) => setPreferredDate(e.target.value)} 
+                                                        min={new Date().toISOString().split('T')[0]} 
+                                                        required 
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                                                        placeholder="mm/dd/yyyy"
+                                                    />
+                                                    <Calendar className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="selectedTimeSlot" className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Time
+                                                </label>
+                                                <div className="relative">
+                                                    <select 
+                                                        id="selectedTimeSlot" 
+                                                        value={selectedTimeSlot} 
+                                                        onChange={(e) => setSelectedTimeSlot(e.target.value)} 
+                                                        required 
+                                                        disabled={!healthcareProvider || availableTimeSlots.length === 0}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        <option value="" disabled>--:-- --</option>
+                                                        {availableTimeSlots.map(slot => (
+                                                            <option key={slot} value={slot}>{slot}</option>
+                                                        ))}
+                                                    </select>
+                                                    <Clock className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                                                </div>
+                                                {healthcareProvider && availableTimeSlots.length === 0 && (
+                                                    <p className="mt-1 text-xs text-red-500">No time slots available for this provider.</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-4">
+                                            <button
+                                                onClick={(e) => handleSubmit(e as any)}
+                                                disabled={isLoading}
+                                                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                        Scheduling...
+                                                    </>
+                                                ) : (
+                                                    'Schedule Appointment'
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
